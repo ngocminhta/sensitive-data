@@ -63,7 +63,7 @@ docker build -t my-api .
 * Run the container:
 
 ```sh
-docker run -p 8000:8000 my-api
+docker run -e PORT=8000 -p 8000:8000 my-api
 ```
 
 ### Deploying to Kubernetes

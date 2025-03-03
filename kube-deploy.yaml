@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensitive-data-detection
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sensitive-data-detection
+  template:
+    metadata:
+      labels:
+        app: sensitive-data-detection
+    spec:
+      containers:
+        - name: sensitive-data-detection
+          image: ngocminhta/sensitive-data-detection:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PORT
+              value: "8000"
+          volumeMounts:
+            - name: sensitive-header
+              mountPath: /app/sensitive-header
+            - name: sensitive-content
+              mountPath: /app/sensitive-content
+      volumes:
+        - name: sensitive-header
+          emptyDir: {}
+        - name: sensitive-content
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensitive-data-detection-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: sensitive-data-detection
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
