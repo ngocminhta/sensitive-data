@@ -57,7 +57,7 @@ Performs classification based on both header and content. Applies additional rul
 * Build the Docker image:
 
 ```sh
-docker build -t my-api .
+docker build -t sensitive-data-detection .
 ```
 
 * Run the container:
@@ -73,22 +73,48 @@ docker run -e PORT=8000 -p 8000:8000 my-api
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-api
+  name: sensitive-data-detection
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: my-api
+      app: sensitive-data-detection
   template:
     metadata:
       labels:
-        app: my-api
+        app: sensitive-data-detection
     spec:
       containers:
-      - name: my-api
-        image: my-api:latest
-        ports:
-        - containerPort: 8000
+        - name: sensitive-data-detection
+          image: ngocminhta/sensitive-data-detection:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PORT
+              value: "8000"
+          volumeMounts:
+            - name: sensitive-header
+              mountPath: /app/sensitive-header
+            - name: sensitive-content
+              mountPath: /app/sensitive-content
+      volumes:
+        - name: sensitive-header
+          emptyDir: {}
+        - name: sensitive-content
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensitive-data-detection-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: sensitive-data-detection
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
 ```
 
 * Apply the deployment:
